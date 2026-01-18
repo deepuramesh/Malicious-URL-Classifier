@@ -6,11 +6,9 @@ from urllib.parse import urlparse
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score
-import matplotlib.pyplot as plt
-import seaborn as sns
 
 # ==========================================
-# 1. FEATURE ENGINEERING (The Detective Work)
+# 1. ADVANCED FEATURE ENGINEERING
 # ==========================================
 def calculate_entropy(text):
     if not text:
@@ -24,77 +22,145 @@ def calculate_entropy(text):
 
 def extract_features(url):
     features = {}
+    url_lower = url.lower()
+    
+    # --- 1. Lexical Features (Structural Analysis) ---
     features['url_length'] = len(url)
-    try:
-        hostname = urlparse(url).netloc
-    except:
-        hostname = url
-    features['hostname_length'] = len(hostname) if hostname else 0
     features['count_dot'] = url.count('.')
     features['count_hyphen'] = url.count('-')
-    features['count_at'] = url.count('@')
-    features['count_question'] = url.count('?')
-    features['count_percent'] = url.count('%')
+    features['count_special'] = url.count('@') + url.count('%') + url.count('?')
+    
+    # --- 2. Chaos (Shannon Entropy) ---
+    features['entropy'] = calculate_entropy(url)
+    
+    # --- 3. IP Address Detection ---
     ip_pattern = r'(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])'
     features['has_ip'] = 1 if re.search(ip_pattern, url) else 0
-    features['entropy'] = calculate_entropy(url)
+
+    # --- 4. BRAND IMPERSONATION (The Heavy 50 List) ---
+    # List of high-value targets frequently spoofed (Global + Indian Context)
+    target_brands = [
+        # --- GLOBAL TECH & SOCIAL ---
+        'google', 'amazon', 'apple', 'facebook', 'netflix', 'paypal', 'microsoft',
+        'instagram', 'whatsapp', 'linkedin', 'twitter', 'tiktok', 'adobe',
+        'dropbox', 'zoom', 'slack', 'shopify', 'spotify', 'reddit', 'pinterest',
+        'snapchat', 'telegram', 'yahoo', 'bing', 'ebay',
+
+        # --- BANKING & FINANCE (Global) ---
+        'chase', 'wellsfargo', 'citi', 'hsbc', 'barclays', 'coinbase', 'binance',
+        'kraken', 'mastercard', 'visa',
+
+        # --- INDIAN CRITICAL INFRASTRUCTURE ---
+        'sbi', 'hdfc', 'icici', 'axis', 'paytm', 'phonepe', 'razorpay',
+        'flipkart', 'zomato', 'swiggy', 'irctc', 'indiapost',
+
+        # --- LOGISTICS & UTILITIES ---
+        'dhl', 'fedex', 'ups', 'usps', 'bluedart', 'delhivery', 'maersk'
+    ]
+    
+    features['brand_impersonation'] = 0
+    
+    try:
+        # Extract just the domain part (e.g., 'google.com' from 'http://google.com/login')
+        domain = urlparse(url).netloc
+        if not domain: domain = url
+    except:
+        domain = url
+
+    for brand in target_brands:
+        # Logic: If the brand name appears in the URL...
+        if brand in url_lower:
+            # ...BUT the domain is NOT one of the official ones
+            official_domains = [
+                f"{brand}.com", f"www.{brand}.com", 
+                f"{brand}.co.in", f"www.{brand}.co.in", 
+                f"{brand}.org", f"{brand}.net", f"{brand}.io"
+            ]
+            
+            # If the domain is NOT in the official list, it's an imposter
+            if domain not in official_domains:
+                features['brand_impersonation'] = 1  # FLAGGED!
+
+    # --- 5. Suspicious Keywords ---
+    suspicious_words = ['login', 'verify', 'update', 'secure', 'gift', 'bonus', 'free', 'signin', 'bank', 'alert', 'account']
+    features['suspicious_keywords'] = sum(1 for word in suspicious_words if word in url_lower)
+    
     return features
 
 # ==========================================
-# 2. SYNTHETIC DATA & TRAINING
+# 2. DATASET GENERATION
 # ==========================================
 def generate_synthetic_data():
-    print("[INFO] Generating synthetic training data...")
-    # Safe sites
-    safe_urls = ['http://google.com', 'https://youtube.com', 'https://wikipedia.org', 'https://amazon.com', 'https://bbc.co.uk'] * 20
-    # Malicious sites (high entropy, weird chars)
-    malicious_urls = ['http://secure-login.com', 'http://x83-bank.xyz', 'http://192.168.1.55/login', 'http://free-iphone.net', 'http://verify-account-now.com'] * 20
+    print("[INFO] Generating synthetic training data (v3.1 - Expanded Brand List)...")
+    
+    # 1. SAFE URLs
+    safe_urls = [
+        'http://google.com', 'https://www.google.com', 'https://amazon.com', 'https://apple.com',
+        'https://netflix.com', 'https://wikipedia.org', 'https://github.com', 'https://bbc.co.uk',
+        'https://sbi.co.in', 'https://irctc.co.in', 'https://flipkart.com', 'https://hdfcbank.com'
+    ] * 50
+    
+    # 2. MALICIOUS: Brand Imposters (Testing the new list)
+    malicious_imposters = [
+        'http://googlexyx.com', 'http://googie.com', 'http://amazon-secure.net',
+        'http://apple-id-verify.com', 'http://netflix-payment-update.xyz',
+        'http://sbi-kyc-update.com', 'http://paytm-cashback-offer.xyz', 
+        'http://irctc-booking-refund.net', 'http://flipkart-big-billion-free.com',
+        'http://googl-e.com', 'http://xyx-randomgift.com'
+    ] * 30
+    
+    # 3. MALICIOUS: High Entropy & IP
+    malicious_tech = [
+        'http://192.168.1.1/login', 'http://x83-z92.org', 'http://a1b2c3d4.net',
+        'http://secure-login-88.xyz'
+    ] * 30
     
     data = []
+    
     for url in safe_urls:
         f = extract_features(url)
-        f['label'] = 0 # Safe
+        f['label'] = 0
         data.append(f)
-    for url in malicious_urls:
+        
+    for url in malicious_imposters + malicious_tech:
         f = extract_features(url)
-        f['label'] = 1 # Malicious
+        f['label'] = 1
         data.append(f)
+        
     return pd.DataFrame(data)
 
 if __name__ == "__main__":
-    # Load and Train
+    # Train
     df = generate_synthetic_data()
     X = df.drop('label', axis=1)
     y = df['label']
-    
-    # Split Data
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
     
-    # Train Model
-    print("[INFO] Training Random Forest Model...")
+    print("[INFO] Training Brand-Aware Model...")
     model = RandomForestClassifier(n_estimators=100)
     model.fit(X_train, y_train)
     
-    # Show Accuracy
-    acc = accuracy_score(y_test, model.predict(X_test))
-    print(f"[INFO] Model Accuracy: {acc*100:.2f}%")
-
-    # Scanner Loop
-    print("\n" + "="*40)
-    print("   MALICIOUS URL SCANNER READY")
-    print("="*40)
+    print(f"[INFO] Model Accuracy: {accuracy_score(y_test, model.predict(X_test))*100:.2f}%")
+    
+    # Scanner
+    print("\n" + "="*50)
+    print("   MALICIOUS URL SCANNER v3.1 (Brand-Aware)")
+    print("="*50)
     
     while True:
-        url = input("\nEnter a URL to scan (or 'exit'): ").strip()
+        url = input("\nEnter URL (or 'exit'): ").strip()
         if url == 'exit': break
         if not url: continue
         
         # Predict
-        features = pd.DataFrame([extract_features(url)])
-        prediction = model.predict(features)[0]
+        feats = extract_features(url)
+        features_df = pd.DataFrame([feats])
+        prediction = model.predict(features_df)[0]
         
-        # Result
+        # Diagnostics
+        print(f"   [Debug] Brand Impersonation: {feats['brand_impersonation']} | Suspicious Words: {feats['suspicious_keywords']} | Entropy: {feats['entropy']:.2f}")
+        
         if prediction == 1:
-            print(f">>> Result: MALICIOUS 🚨 (Entropy: {features['entropy'][0]:.2f})")
+            print(f">>> Result: MALICIOUS 🚨")
         else:
-            print(f">>> Result: SAFE ✅ (Entropy: {features['entropy'][0]:.2f})")
+            print(f">>> Result: SAFE ✅")
