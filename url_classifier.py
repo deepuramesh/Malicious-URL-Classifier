@@ -90,17 +90,20 @@ def extract_features(url):
 # ==========================================
 # 2. DATASET GENERATION
 # ==========================================
+# ==========================================
+# 2. DATASET GENERATION (Patched for IP Domains)
+# ==========================================
 def generate_synthetic_data():
-    print("[INFO] Generating synthetic training data (v3.1 - Expanded Brand List)...")
+    print("[INFO] Generating synthetic training data (v3.2 - IP Domain Patch)...")
     
     # 1. SAFE URLs
     safe_urls = [
         'http://google.com', 'https://www.google.com', 'https://amazon.com', 'https://apple.com',
         'https://netflix.com', 'https://wikipedia.org', 'https://github.com', 'https://bbc.co.uk',
         'https://sbi.co.in', 'https://irctc.co.in', 'https://flipkart.com', 'https://hdfcbank.com'
-    ] * 50
+    ] * 60  # Increased slightly to balance
     
-    # 2. MALICIOUS: Brand Imposters (Testing the new list)
+    # 2. MALICIOUS: Brand Imposters
     malicious_imposters = [
         'http://googlexyx.com', 'http://googie.com', 'http://amazon-secure.net',
         'http://apple-id-verify.com', 'http://netflix-payment-update.xyz',
@@ -109,10 +112,17 @@ def generate_synthetic_data():
         'http://googl-e.com', 'http://xyx-randomgift.com'
     ] * 30
     
-    # 3. MALICIOUS: High Entropy & IP
+    # 3. MALICIOUS: High Entropy & Raw IP
     malicious_tech = [
         'http://192.168.1.1/login', 'http://x83-z92.org', 'http://a1b2c3d4.net',
         'http://secure-login-88.xyz'
+    ] * 30
+
+    # 4. MALICIOUS: Sneaky IP Domains (THE FIX)
+    # These look like IPs but end in .com/.net to fool the entropy check
+    malicious_sneaky_ips = [
+        'http://13.15.11.1.com', 'http://10.0.0.1.site', 'http://192.168.1.1.net',
+        'http://172.16.0.55.org', 'http://127.0.0.1.web', 'http://8.8.8.8.xyz'
     ] * 30
     
     data = []
@@ -122,7 +132,8 @@ def generate_synthetic_data():
         f['label'] = 0
         data.append(f)
         
-    for url in malicious_imposters + malicious_tech:
+    # Combine all malicious types
+    for url in malicious_imposters + malicious_tech + malicious_sneaky_ips:
         f = extract_features(url)
         f['label'] = 1
         data.append(f)
