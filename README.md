@@ -1,41 +1,31 @@
-# Malicious-URL-Classifier
-This project primarily focuses on the development of a Python based Malicious URL Classifier that automatically identifies and categorizes the URLs as either safe or malicious using machine learning technology.
+# Malicious URL Classifier 
 
-Main Objective/Deliverable:
-• To develop a machine learning based classifier that predicts whether a URL is safe or malicious.
-• To pre-process and analyse the URL dataset, extracting meaningful features for classification
-• To train the model and evaluate using different algorithms such as (Logistic Regression, Random Forest, Naïve Bayes)
-• To deliver a complete working prototype, source code, sample output and documentation.
-• To provide visual output using graphs and reports of model performance and prediction results.
+![Python](https://img.shields.io/badge/Python-3.x-blue.svg) ![License](https://img.shields.io/badge/License-MIT-green.svg) ![Status](https://img.shields.io/badge/Status-Prototype-orange.svg)
 
-Timeline and Milestones:
-(may include course enrolment, phases of project planning to do... etc)
+**A Supervised Machine Learning engine to detect Zero-Day Phishing attacks, DGA domains, and Brand Impersonation attempts in real-time.**
 
+---
 
-1 Topic selection, proposal approval and basic environmental setup Week 1–2
-2 Researching on phishing techniques, URL features, and ML algorithms to be used Week 3–4
-3 Collect and preprocess publicly available datasets (malicious and safe URLs both) Week 5–6
-4 Implement the feature extraction and train initial ML models Week 7–8
-5 Evaluate the performance, tune hyperparameters, and visualize results Week 9–10
-6 Integrate results into Python script with reporting module Week 11–12
-7 Prepare final documentation, screenshots, and final report Week 13–14
-8 Finalize demo video, presentation slides, and submission for approval Week 15–16
+## 📌 Project Overview
+Traditional firewalls rely on **static blocklists** (blacklisting). If a hacker creates a new URL today, it takes hours for blocklists to update, leaving users vulnerable. 
 
-Tools to be used for the project.
+This project moves from **Reactive Matching** to **Proactive Prediction**. It analyzes the *structure* and *mathematical properties* of a URL to flag malicious intent instantly—even if the URL has never been seen before.
 
-Num Software Tools Specifications
-1 Python 3.x Core programming language used for implementation.
-2 pandas, numpy, scikit-learn For establishing secure connections, fetching, and parsing certificate details.
-3 matplotlib, seaborn For visualizing the results and performance metrics.
-4 Visual Studio Code For development and testing environment.
-5 Kaggle Dataset / PhishTank Dataset These are the public datasets for training and testing the model.
-6 Git / GitHub Version control and code management for development
-and documentation.
+## 🚀 Key Features (v3.1)
+- **🧠 Shannon Entropy Analysis:** Calculates the "Chaos Score" of a domain to detect bot-generated DGA links (e.g., `x83-z92-q11.net`).
+- **🛡️ Brand Impersonation Defense:** Protects **50+ High-Value Targets** (Google, SBI, Amazon, IRCTC, etc.) by flagging spoofed domains (e.g., `sbi-kyc-update.com`).
+- **🔍 IP-Based Threat Detection:** Identifies raw IP usage in URLs, a common indicator of malware hosting.
+- **⚡ Real-Time Scanning:** Classifies URLs in <50ms using a lightweight Random Forest model.
 
-Learning involved:
+## 🛠️ Technology Stack
+- **Language:** Python 3.x
+- **ML Engine:** Scikit-Learn (Random Forest Classifier)
+- **Data Processing:** Pandas, NumPy, RegEx
+- **Feature Engineering:** Shannon Entropy, Lexical Analysis
 
-1 Machine Learning Fundamentals - To learn how supervised learning models classify data and they detect patterns.
-2 Feature Engineering Understand the URL-based feature extraction and its impact on model accuracy.
-3 Cyber Threat Detection - Exploring how the AI can detect phishing and malicious URLs automatically.
-4 Model Evaluation Learn how to measure accuracy, precision, recall for ML models.
-5 AI/ML in Cloud Security - Study how similar ML-based techniques can be integrated into Cloud SOC systems.
+## ⚙️ How to Run Locally
+
+1. **Clone the Repository**
+   ```bash
+   git clone [https://github.com/deepuramesh/Malicious-URL-Classifier.git](https://github.com/deepuramesh/Malicious-URL-Classifier.git)
+   cd Malicious-URL-Classifier
